@@ -14,14 +14,14 @@ public class LogicScript : MonoBehaviour
     private List<GameObject> creatures = new List<GameObject>();
     private int day;
 
-    private int FOOD_COUNT = 10;
-    private int CREATURE_COUNT = 5;
-    private float LEFT_BOUND = -20f;
-    private float RIGHT_BOUND =  20f;
-    private float UPPER_BOUND = 20f;
-    private float LOWER_BOUND = -20f;
-    private float DAY_TIME = 10f;
-    private float NIGHT_TIME = 5f;
+    private readonly int FOOD_COUNT = 10;
+    private readonly int CREATURE_COUNT = 5;
+    private readonly float LEFT_BOUND = -20f;
+    private readonly float RIGHT_BOUND =  20f;
+    private readonly float UPPER_BOUND = 20f;
+    private readonly float LOWER_BOUND = -20f;
+    private readonly float DAY_TIME = 10f;
+    private readonly float NIGHT_TIME = 5f;
 
     // Start is called before the first frame update
     void Start()
@@ -31,8 +31,8 @@ public class LogicScript : MonoBehaviour
         dayTimer = DAY_TIME;
         nightTimer = NIGHT_TIME;
 
-        spawnFood();
-        spawnCreatures();
+        SpawnFood();
+        SpawnCreatures();
     }
 
     // Update is called once per frame
@@ -42,7 +42,7 @@ public class LogicScript : MonoBehaviour
         if (dayTimer <= 0f)
         {
             if (nightTimer == NIGHT_TIME)
-                endDay();
+                EndDay();
 
             nightTimer -= Time.deltaTime;
 
@@ -51,7 +51,7 @@ public class LogicScript : MonoBehaviour
                 dayTimer = DAY_TIME;
                 nightTimer = NIGHT_TIME;
 
-                startDay();
+                StartDay();
             }
 
         } else
@@ -60,7 +60,7 @@ public class LogicScript : MonoBehaviour
         }
     }
     
-    private void spawnFood()
+    private void SpawnFood()
     {
         for (int i = 0; i < FOOD_COUNT; i++)
         {
@@ -71,7 +71,7 @@ public class LogicScript : MonoBehaviour
         }
     }
 
-    private void spawnCreatures()
+    private void SpawnCreatures()
     {
         for (int i = 0; i < CREATURE_COUNT; i++)
         {
@@ -83,23 +83,23 @@ public class LogicScript : MonoBehaviour
         }
     }
 
-    private void endDay()
+    private void EndDay()
     {
-        killCreatures();
+        KillCreatures();
     }
 
-    private void startDay()
+    private void StartDay()
     {
         day++;
 
-        spawnFood();
+        SpawnFood();
 
-        creatures.ForEach(resetCreature);
+        creatures.ForEach(ResetCreature);
 
         Debug.Log(day);
     }
 
-    private void resetCreature(GameObject creature)
+    private void ResetCreature(GameObject creature)
     {
         if (creature != null)
         {
@@ -108,7 +108,7 @@ public class LogicScript : MonoBehaviour
         }
     }
 
-    private void killCreatures()
+    private void KillCreatures()
     {
         for (int i = 0; i < creatures.Count; i++)
         {

@@ -14,12 +14,12 @@ public class CreatureScript : MonoBehaviour
     public bool sheltered = false;
     private int foodRequired;
 
-    private float ANGULAR_VELOCITY = 180f;
-    private float TARGET_DEADBAND = 0.2f;
-    private float DIRECTION_CHANGE_TIME = 0.1f;
-    private float BASE_SPEED = 10f;
-    private float TURN_PROBABILITY = 0.800f;
-    private float CHASE_MULTIPLIER = 1.5f;
+    private readonly float ANGULAR_VELOCITY = 180f;
+    private readonly float TARGET_DEADBAND = 0.2f;
+    private readonly float DIRECTION_CHANGE_TIME = 0.1f;
+    private readonly float BASE_SPEED = 10f;
+    private readonly float TURN_PROBABILITY = 0.800f;
+    private readonly float CHASE_MULTIPLIER = 1.5f;
 
     [SerializeField]
     private Rigidbody2D rb;
@@ -46,13 +46,13 @@ public class CreatureScript : MonoBehaviour
         {
             speed = BASE_SPEED * CHASE_MULTIPLIER;
 
-            goToTarget(home);
+            GoToTarget(home);
 
         } else if (hit.collider != null && hit.collider.gameObject.tag.Equals("Food"))
         {
             speed = BASE_SPEED * CHASE_MULTIPLIER;
 
-            goToTarget(hit.collider.gameObject.transform.position);
+            GoToTarget(hit.collider.gameObject.transform.position);
             
         } else
         {
@@ -97,7 +97,7 @@ public class CreatureScript : MonoBehaviour
         }
     }
 
-    private void goToTarget(Vector2 targetPos)
+    private void GoToTarget(Vector2 targetPos)
     {
         float distanceX = targetPos.x - transform.position.x;
         float distanceY = targetPos.y - transform.position.y;
