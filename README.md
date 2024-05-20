@@ -1,0 +1,1 @@
+To use these assets in order to create the EcoSim, clone this repository into your Unity project's main directory. Then, rename the cloned folder to 'Assets' in order to replace the previous assets folder, turning this project into EcoSim.
