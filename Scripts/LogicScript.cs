@@ -14,8 +14,8 @@ public class LogicScript : MonoBehaviour
     private List<GameObject> creatures = new List<GameObject>();
     private int day;
 
-    private readonly int FOOD_COUNT = 100;
-    private readonly int CREATURE_COUNT = 1;
+    private readonly int FOOD_COUNT = 10;
+    private readonly int CREATURE_COUNT = 5;
     private readonly float LEFT_BOUND = -30f;
     private readonly float RIGHT_BOUND =  30f;
     private readonly float UPPER_BOUND = 20f;
