@@ -226,6 +226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 381348277}
+  cam: {fileID: 519420031}
 --- !u!4 &381348279
 Transform:
   m_ObjectHideFlags: 0

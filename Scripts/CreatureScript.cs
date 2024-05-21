@@ -24,11 +24,11 @@ public class CreatureScript : MonoBehaviour
         Ambi
     }
 
-    private readonly float ANGULAR_VELOCITY = 180f;
+    private readonly float ANGULAR_VELOCITY = 720f;
     private readonly float ANGLE_TARGET_DEADBAND = 2f;
     private readonly float POSITION_TARGET_DEADBAND = 0.2f;
     private readonly float DIRECTION_CHANGE_TIME = 0.1f;
-    private readonly float BASE_SPEED = 10f;
+    private readonly float BASE_SPEED = 20f;
     private readonly float TURN_PROBABILITY = 0.800f;
     private readonly float CHASE_MULTIPLIER = 1.5f;
     private readonly float PRIMARY_DIRECTION_PROBABILITY = 0.7f;
@@ -129,9 +129,9 @@ public class CreatureScript : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D col)
+    private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.collider.gameObject.tag == "Food")
+        if (col.gameObject.tag == "Food")
         {
             Destroy(col.gameObject);
             currentFood++;
