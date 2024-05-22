@@ -4,13 +4,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.VisualScripting;
 using System;
+using System.Runtime.CompilerServices;
+using System.Numerics;
 
 public class CreatureScript : MonoBehaviour
 {
+    private string creatureName;
+    private string[] creatureNames = { "Oliver", "Rin", "Rudy", "Frank", "Alex", "Jacob", "Tina", "Hunter", "Meza", "Travis", "Hadizah" };
     private int currentDirection;
     private int currentFood;
     private float speed;
-    private Vector2 home;
+    private UnityEngine.Vector2 home;
     private float directionChangeTimer;
     public bool enoughFoodConsumed;
     public bool sheltered = false;
@@ -31,7 +35,7 @@ public class CreatureScript : MonoBehaviour
     private readonly float BASE_SPEED = 20f;
     private readonly float TURN_PROBABILITY = 0.800f;
     private readonly float CHASE_MULTIPLIER = 1.5f;
-    private readonly float PRIMARY_DIRECTION_PROBABILITY = 0.7f;
+    private readonly float PRIMARY_DIRECTION_PROBABILITY = 0.5f;
 
     [SerializeField]
     private Rigidbody2D rb;
@@ -55,7 +59,7 @@ public class CreatureScript : MonoBehaviour
                 _ => DirectionalTendency.Ambi,
             };
 
-        Debug.Log(tendency);
+        creatureName = creatureNames[UnityEngine.Random.Range(0, creatureNames.Length)];
     }
 
     // Update is called once per frame
@@ -69,7 +73,7 @@ public class CreatureScript : MonoBehaviour
 
             GoToTarget(home);
 
-        } else if (hit.collider != null && hit.collider.gameObject.tag.Equals("Food"))
+        } else if (hit.collider != null && hit.collider.gameObject.CompareTag("Food"))
         {
             speed = BASE_SPEED * CHASE_MULTIPLIER;
 
@@ -131,7 +135,7 @@ public class CreatureScript : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.gameObject.tag == "Food")
+        if (col.gameObject.tag.Equals("Food"))
         {
             Destroy(col.gameObject);
             currentFood++;
@@ -142,21 +146,23 @@ public class CreatureScript : MonoBehaviour
         }
     }
 
-    private void GoToTarget(Vector2 targetPos)
+    private void GoToTarget(UnityEngine.Vector2 targetPos)
     {
-        float distanceX = targetPos.x - transform.position.x;
-        float distanceY = targetPos.y - transform.position.y;
+        UnityEngine.Vector3 targetDir = new UnityEngine.Vector3(targetPos.x, targetPos.y, 0f) - transform.position;
 
-        float desiredAOA = -Mathf.Atan2(distanceX, distanceY) * Mathf.Rad2Deg;
+        // TODO: SOMETHING AB THIS MATH IS NOT MATHING AND I FEEL STUPID
+
+        float targetAngle = Mathf.Atan2(targetDir.y, targetDir.x) * Mathf.Rad2Deg;
         
+        // ITS PROBABLY THIS
         float currentAngle = transform.rotation.eulerAngles.z;
 
-        if (currentAngle > 180f)
+        if (currentAngle > 180)
         {
             currentAngle -= 360f;
         }
 
-        float minusAtan = currentAngle - desiredAOA;
+        float minusAtan = currentAngle - targetAngle;
 
         if (minusAtan < -ANGLE_TARGET_DEADBAND)
         {
@@ -169,13 +175,19 @@ public class CreatureScript : MonoBehaviour
             currentDirection = 0;
         }
 
+        UnityEngine.Vector2 dir = targetPos - (UnityEngine.Vector2) transform.position;
+
         Debug.DrawRay(
             transform.position, 
-            transform.up * (float) Sqrt((double) (distanceX * distanceX + distanceY * distanceY)), 
+            dir.normalized * (float) Sqrt(targetDir.x * targetDir.x + targetDir.y * targetDir.y), 
             Color.green);
     }
 
-    private bool NearPose(Vector2 pose) {
+    private bool NearPose(UnityEngine.Vector2 pose) {
         return Abs(pose.x - transform.position.x) < POSITION_TARGET_DEADBAND && Abs(pose.y - transform.position.y) < POSITION_TARGET_DEADBAND;
+    }
+
+    public string GetName() {
+        return creatureName;
     }
 }
