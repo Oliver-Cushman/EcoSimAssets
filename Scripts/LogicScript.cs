@@ -8,20 +8,23 @@ public class LogicScript : MonoBehaviour
     GameObject foodPrefab;
     [SerializeField]
     GameObject creaturePrefab;
+    [SerializeField]
+    private TMPro.TextMeshProUGUI dayText;
     
     private float dayTimer;
     private float nightTimer;
     private List<GameObject> creatures = new List<GameObject>();
     private int day;
 
-    private readonly int FOOD_COUNT = 200;
-    private readonly int CREATURE_COUNT = 1;
+    private readonly int INITIAL_FOOD = 100;
+    private readonly int INCREMENT_FOOD = 25;
+    private readonly int CREATURE_COUNT = 30;
     private readonly float LEFT_BOUND = -100f;
     private readonly float RIGHT_BOUND =  100f;
     private readonly float UPPER_BOUND = 100f;
     private readonly float LOWER_BOUND = -100f;
-    private readonly float DAY_TIME = 30f;
-    private readonly float NIGHT_TIME = 5f;
+    private readonly float DAY_TIME = 10f;
+    private readonly float NIGHT_TIME = 2f;
 
     // Start is called before the first frame update
     void Start()
@@ -31,7 +34,9 @@ public class LogicScript : MonoBehaviour
         dayTimer = DAY_TIME;
         nightTimer = NIGHT_TIME;
 
-        SpawnFood();
+        dayText.text = "Day " + day;
+
+        SpawnFood(true);
         SpawnCreatures();
     }
 
@@ -60,9 +65,9 @@ public class LogicScript : MonoBehaviour
         }
     }
     
-    private void SpawnFood()
+    private void SpawnFood(bool initial)
     {
-        for (int i = 0; i < FOOD_COUNT; i++)
+        for (int i = 0; i < (initial ? INITIAL_FOOD : INCREMENT_FOOD); i++)
         {
             Instantiate(
                 foodPrefab, 
@@ -92,7 +97,9 @@ public class LogicScript : MonoBehaviour
     {
         day++;
 
-        SpawnFood();
+        dayText.text = "Day " + day;
+
+        SpawnFood(false);
 
         creatures.ForEach(ResetCreature);
 
@@ -103,8 +110,7 @@ public class LogicScript : MonoBehaviour
     {
         if (creature != null)
         {
-            creature.GetComponent<CreatureScript>().enoughFoodConsumed = false;
-            creature.GetComponent<CreatureScript>().sheltered = false;
+            creature.GetComponent<CreatureScript>().Reset();
         }
     }
 
@@ -113,12 +119,12 @@ public class LogicScript : MonoBehaviour
         for (int i = 0; i < creatures.Count; i++)
         {
             GameObject creature = creatures[i];
-            if (creature != null && (!creature.GetComponent<CreatureScript>().enoughFoodConsumed || !creature.GetComponent<CreatureScript>().sheltered))
+            if (creature != null && (!creature.GetComponent<CreatureScript>().Safe()))
             {
+                Debug.Log("Death: " + creature.GetComponent<CreatureScript>().GetTendency());
                 creatures.Remove(creature);
                 Destroy(creature);
                 i--;
-                Debug.Log("Death");
             }
         }
     }

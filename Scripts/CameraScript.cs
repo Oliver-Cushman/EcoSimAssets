@@ -87,7 +87,7 @@ public class CameraScript : MonoBehaviour
                 currentCreatureIndex++;
                 currentCreatureIndex %= logic.GetCreatures().Count;
                 currentCreature = logic.GetCreatures()[currentCreatureIndex];
-                text.text = "Watching: " + currentCreature.GetComponent<CreatureScript>().GetName();
+                text.text = "Watching: " + currentCreature.GetComponent<CreatureScript>().GetCreatureName();
             }
         }
 
