@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 2535115461557732154}
   m_Layer: 0
   m_Name: Creature
-  m_TagString: Untagged
+  m_TagString: Creature
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100,8 +100,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7681fcc8694b5214fab8ff64b11226ca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enoughFoodConsumed: 0
-  sheltered: 0
   rb: {fileID: 1384211932986204369}
 --- !u!50 &1384211932986204369
 Rigidbody2D:
