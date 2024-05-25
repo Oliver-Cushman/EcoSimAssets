@@ -6,7 +6,6 @@ public class CreatureScript : MonoBehaviour
     private bool enoughFoodConsumed;
     private bool sheltered;
     private bool breeded;
-    private string[] creatureNames = { "Oliver", "Rudy", "Frank", "Alex", "Jacob", "Tina", "Hunter", "Meza", "Travis", "Hadizah" };
     private float speed;
     private int currentDirection;
     private int currentFood;
@@ -18,10 +17,11 @@ public class CreatureScript : MonoBehaviour
     private UnityEngine.Vector2 home;
     private DirectionalTendency tendency;
     private int daySpawned;
+    private bool male;
 
-    public float getAngularVelocity()
+    public bool GetMale()
     {
-        return this.angularVelocity;
+        return male;
     }
 
     public string GetCreatureName()
@@ -49,10 +49,10 @@ public class CreatureScript : MonoBehaviour
     }
 
     private readonly float CHARGE_ANGULAR_VELOCITY = 720f;
-    private readonly float SEARCH_ANGULAR_VELOCITY = 60f; 
+    private readonly float SEARCH_ANGULAR_VELOCITY = 180f; 
     private readonly float POSITION_TARGET_DEADBAND = 1f;
     private readonly float DIRECTION_CHANGE_TIME = 0.1f;
-    private readonly float BASE_SPEED = 20f;
+    private readonly float BASE_SPEED = 30f;
     private readonly float TURN_PROBABILITY = 0.800f;
     private readonly float CHASE_MULTIPLIER = 1.5f;
     private readonly float PRIMARY_DIRECTION_PROBABILITY = 0.800f;
@@ -71,9 +71,8 @@ public class CreatureScript : MonoBehaviour
         directionChangeTimer = DIRECTION_CHANGE_TIME;
         enoughFoodConsumed = false;
         sheltered = false;
-        breeded = false;
+        breeded = true;
         foodRequired = 1;
-        creatureName = creatureNames[UnityEngine.Random.Range(0, creatureNames.Length)];
     }
 
     // Update is called once per frame
@@ -88,13 +87,12 @@ public class CreatureScript : MonoBehaviour
 
             GoToTarget(hit.collider.gameObject.transform.position);
             
-        } else if (hit.collider != null && hit.collider.gameObject.CompareTag("Creature") && enoughFoodConsumed && !breeded && ShouldBreed())
+        } else if (hit.collider != null && hit.collider.gameObject.CompareTag("Creature") && ShouldBreed() && male && !hit.collider.gameObject.GetComponent<CreatureScript>().GetMale())
         {
             speed = BASE_SPEED * CHASE_MULTIPLIER;
             angularVelocity = CHARGE_ANGULAR_VELOCITY;
 
             GoToTarget(hit.collider.gameObject.transform.position);
-
             
         } else if (enoughFoodConsumed)
         {
@@ -160,7 +158,7 @@ public class CreatureScript : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.gameObject.tag.Equals("Food"))
+        if (col.gameObject.CompareTag("Food"))
         {
             Destroy(col.gameObject);
             currentFood++;
@@ -168,7 +166,7 @@ public class CreatureScript : MonoBehaviour
             {
                 enoughFoodConsumed = true;
             }
-        } else if (col.gameObject.tag.Equals("Creature"))
+        } else if (col.gameObject.CompareTag("Creature") && ShouldBreed())
         {
             breeded = true;
         }
@@ -211,13 +209,14 @@ public class CreatureScript : MonoBehaviour
             Color.green);
     }
 
-    private bool NearPose(UnityEngine.Vector2 pose) {
+    private bool NearPose(UnityEngine.Vector2 pose) 
+    {
         return Abs(pose.x - transform.position.x) < POSITION_TARGET_DEADBAND && Abs(pose.y - transform.position.y) < POSITION_TARGET_DEADBAND;
     }
 
     private bool ShouldBreed()
     {
-        return true;
+        return enoughFoodConsumed && !breeded;
     }
 
     private float NormalizedAngle(float angle)
@@ -233,28 +232,25 @@ public class CreatureScript : MonoBehaviour
         currentFood = 0;
         enoughFoodConsumed = false;
         sheltered = false;
-        breeded = false;
+        // breeded = false;
     }
 
-    public bool Safe() {
+    public bool Safe() 
+    {
         return enoughFoodConsumed && sheltered;
     }
 
-    public void SetTraits(string tendency, int daySpawned, string name)
+    public void SetTraits(string tendency, int daySpawned, string name, bool male)
     {
-        switch (tendency) {
-            case "Left": 
-                this.tendency = DirectionalTendency.Left;
-                break;
-            case "Right":
-                this.tendency = DirectionalTendency.Right;
-                break;
-            default:
-                this.tendency = DirectionalTendency.Ambi;
-                break;
-        }
+        this.tendency = tendency switch
+        {
+            "Left" => DirectionalTendency.Left,
+            "Right" => DirectionalTendency.Right,
+            _ => DirectionalTendency.Ambi,
+        };
 
         this.daySpawned = daySpawned;
-        this.name = name;
+        this.creatureName = name;
+        this.male = male;
     }
 }

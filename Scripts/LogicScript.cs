@@ -25,6 +25,7 @@ public class LogicScript : MonoBehaviour
     private readonly float LOWER_BOUND = -100f;
     private readonly float DAY_TIME = 10f;
     private readonly float NIGHT_TIME = 2f;
+    private readonly string[] CREATURE_NAMES = { "Oliver", "Rudy", "Frank", "Alex", "Jacob", "Tina", "Hunter", "Meza", "Travis", "Hadizah" };
 
     // Start is called before the first frame update
     void Start()
@@ -80,11 +81,26 @@ public class LogicScript : MonoBehaviour
     {
         for (int i = 0; i < CREATURE_COUNT; i++)
         {
-            creatures.Add(
-                Instantiate(
-                    creaturePrefab, 
-                    new Vector2(Random.Range(LEFT_BOUND, RIGHT_BOUND), Random.Range(LOWER_BOUND, UPPER_BOUND)), 
-                    Quaternion.Euler(0, 0, Random.Range(0f, 360f))));
+            string tendency = "";
+            switch (Random.Range(0, 3)) {
+                case 0:
+                    tendency = "Left";
+                    break;
+                case 1:
+                    tendency = "Right";
+                    break;
+                case 2:
+                    tendency = "Ambi";
+                    break;
+            }
+
+            SpawnCreature(
+                tendency, 
+                day, 
+                CREATURE_NAMES[Random.Range(0, CREATURE_NAMES.Length)],
+                Random.Range(0, 2) == 0,
+                new Vector2(Random.Range(LEFT_BOUND, RIGHT_BOUND), Random.Range(LOWER_BOUND, UPPER_BOUND)),
+                Random.Range(0f, 360f));
         }
     }
 
@@ -131,5 +147,12 @@ public class LogicScript : MonoBehaviour
 
     public List<GameObject> GetCreatures() {
         return creatures;
+    }
+
+    private void SpawnCreature(string tendency, int daySpawned, string name, bool male, Vector2 position, float angle) 
+    {
+        GameObject creature = Instantiate(creaturePrefab, position, Quaternion.Euler(0, 0, angle));
+        creature.GetComponent<CreatureScript>().SetTraits(tendency, daySpawned, name, male);
+        creatures.Add(creature);
     }
 }
