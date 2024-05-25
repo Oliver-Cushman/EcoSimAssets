@@ -10,6 +10,8 @@ public class LogicScript : MonoBehaviour
     GameObject creaturePrefab;
     [SerializeField]
     private TMPro.TextMeshProUGUI dayText;
+    [SerializeField]
+    private TMPro.TextMeshProUGUI countText;
     
     private float dayTimer;
     private float nightTimer;
@@ -64,6 +66,8 @@ public class LogicScript : MonoBehaviour
         {
             dayTimer -= Time.deltaTime;
         }
+
+        countText.text = creatures.Count.ToString();
     }
     
     private void SpawnFood(bool initial)
@@ -149,10 +153,20 @@ public class LogicScript : MonoBehaviour
         return creatures;
     }
 
-    private void SpawnCreature(string tendency, int daySpawned, string name, bool male, Vector2 position, float angle) 
+    public void SpawnCreature(string tendency, int daySpawned, string name, bool male, Vector2 position, float angle) 
     {
         GameObject creature = Instantiate(creaturePrefab, position, Quaternion.Euler(0, 0, angle));
         creature.GetComponent<CreatureScript>().SetTraits(tendency, daySpawned, name, male);
         creatures.Add(creature);
+    }
+
+    public void SpawnCreature(string tendency, string name, bool male, Vector2 position, float angle) 
+    {
+        SpawnCreature(tendency, day, name, male, position, angle);
+    }
+
+    public void SpawnCreature(string tendency, bool male, Vector2 position, float angle) 
+    {
+        SpawnCreature(tendency, CREATURE_NAMES[Random.Range(0, CREATURE_NAMES.Length)], male, position, angle);
     }
 }
