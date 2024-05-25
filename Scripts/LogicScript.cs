@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LogicScript : MonoBehaviour
@@ -8,6 +9,8 @@ public class LogicScript : MonoBehaviour
     GameObject foodPrefab;
     [SerializeField]
     GameObject creaturePrefab;
+    [SerializeField]
+    GameObject predatorPrefab;
     [SerializeField]
     private TMPro.TextMeshProUGUI dayText;
     [SerializeField]
@@ -18,14 +21,15 @@ public class LogicScript : MonoBehaviour
     private List<GameObject> creatures = new List<GameObject>();
     private int day;
 
-    private readonly int INITIAL_FOOD = 100;
-    private readonly int INCREMENT_FOOD = 25;
-    private readonly int CREATURE_COUNT = 30;
-    private readonly float LEFT_BOUND = -100f;
-    private readonly float RIGHT_BOUND =  100f;
-    private readonly float UPPER_BOUND = 100f;
-    private readonly float LOWER_BOUND = -100f;
-    private readonly float DAY_TIME = 10f;
+    private readonly int INITIAL_FOOD = 500;
+    private readonly int INCREMENT_FOOD = 150;
+    private readonly int HERBIVORE_COUNT = 150;
+    private readonly int PREDATOR_COUNT = 50;
+    private readonly float LEFT_BOUND = -500f;
+    private readonly float RIGHT_BOUND =  500f;
+    private readonly float UPPER_BOUND = 500f;
+    private readonly float LOWER_BOUND = -500f;
+    private readonly float DAY_TIME = 30f;
     private readonly float NIGHT_TIME = 2f;
     private readonly string[] CREATURE_NAMES = { "Oliver", "Rudy", "Frank", "Alex", "Jacob", "Tina", "Hunter", "Meza", "Travis", "Hadizah" };
 
@@ -33,8 +37,8 @@ public class LogicScript : MonoBehaviour
     void Start()
     {
 
-        day = 1;
-        dayTimer = DAY_TIME;
+        day = 0;
+        dayTimer = DAY_TIME / 2;
         nightTimer = NIGHT_TIME;
 
         dayText.text = "Day " + day;
@@ -67,7 +71,7 @@ public class LogicScript : MonoBehaviour
             dayTimer -= Time.deltaTime;
         }
 
-        countText.text = creatures.Count.ToString();
+        countText.text = creatures.Count.ToString() + " Creatures Remaining";
     }
     
     private void SpawnFood(bool initial)
@@ -83,7 +87,7 @@ public class LogicScript : MonoBehaviour
 
     private void SpawnCreatures()
     {
-        for (int i = 0; i < CREATURE_COUNT; i++)
+        for (int i = 0; i < HERBIVORE_COUNT + PREDATOR_COUNT; i++)
         {
             string tendency = "";
             switch (Random.Range(0, 3)) {
@@ -98,13 +102,21 @@ public class LogicScript : MonoBehaviour
                     break;
             }
 
-            SpawnCreature(
-                tendency, 
-                day, 
-                CREATURE_NAMES[Random.Range(0, CREATURE_NAMES.Length)],
+            if (i < PREDATOR_COUNT)
+            {
+                SpawnPredator(
+                tendency,
                 Random.Range(0, 2) == 0,
                 new Vector2(Random.Range(LEFT_BOUND, RIGHT_BOUND), Random.Range(LOWER_BOUND, UPPER_BOUND)),
                 Random.Range(0f, 360f));
+            } else
+            {
+                SpawnHerbivore(
+                tendency,
+                Random.Range(0, 2) == 0,
+                new Vector2(Random.Range(LEFT_BOUND, RIGHT_BOUND), Random.Range(LOWER_BOUND, UPPER_BOUND)),
+                Random.Range(0f, 360f));
+            }
         }
     }
 
@@ -141,9 +153,7 @@ public class LogicScript : MonoBehaviour
             GameObject creature = creatures[i];
             if (creature != null && (!creature.GetComponent<CreatureScript>().Safe()))
             {
-                Debug.Log("Death: " + creature.GetComponent<CreatureScript>().GetTendency());
-                creatures.Remove(creature);
-                Destroy(creature);
+                KillCreature(creatures[i]);
                 i--;
             }
         }
@@ -153,20 +163,37 @@ public class LogicScript : MonoBehaviour
         return creatures;
     }
 
-    public void SpawnCreature(string tendency, int daySpawned, string name, bool male, Vector2 position, float angle) 
+    public void SpawnCreature(string tendency, int daySpawned, string name, bool male, Vector2 position, float angle, bool predator) 
     {
-        GameObject creature = Instantiate(creaturePrefab, position, Quaternion.Euler(0, 0, angle));
-        creature.GetComponent<CreatureScript>().SetTraits(tendency, daySpawned, name, male);
+        GameObject creature = Instantiate(predator ? predatorPrefab : creaturePrefab, position, Quaternion.Euler(0, 0, angle));
+        creature.GetComponent<CreatureScript>().SetTraits(tendency, daySpawned, name, male, predator);
         creatures.Add(creature);
     }
 
-    public void SpawnCreature(string tendency, string name, bool male, Vector2 position, float angle) 
+    public void SpawnCreature(string tendency, string name, bool male, Vector2 position, float angle, bool predator) 
     {
-        SpawnCreature(tendency, day, name, male, position, angle);
+        SpawnCreature(tendency, day, name, male, position, angle, predator);
     }
 
-    public void SpawnCreature(string tendency, bool male, Vector2 position, float angle) 
+    public void SpawnCreature(string tendency, bool male, Vector2 position, float angle, bool predator) 
     {
-        SpawnCreature(tendency, CREATURE_NAMES[Random.Range(0, CREATURE_NAMES.Length)], male, position, angle);
+        SpawnCreature(tendency, CREATURE_NAMES[Random.Range(0, CREATURE_NAMES.Length)], male, position, angle, predator);
+    }
+    
+    public void SpawnHerbivore(string tendency, bool male, Vector2 position, float angle) {
+        SpawnCreature(tendency, male, position, angle, false);
+    }
+
+    public void SpawnPredator(string tendency, bool male, Vector2 position, float angle)
+    {
+        SpawnCreature(tendency, male, position, angle, true);
+    }
+
+    public void KillCreature(GameObject creature)
+    {
+        Debug.Log("Death");
+        creatures.Remove(creature);
+        Destroy(creature.GetComponent<CreatureScript>().GetHome());
+        Destroy(creature);
     }
 }

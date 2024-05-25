@@ -26,7 +26,7 @@ public class CameraScript : MonoBehaviour
     private readonly float CAMERA_BASE_SIZE = 20f;
     private readonly float ZOOM_INCREMENT = 5f;
     private readonly float MIN_ZOOM = 10f;
-    private readonly float MAX_ZOOM = 100f;
+    private readonly float MAX_ZOOM = 200f;
 
 
 
@@ -87,7 +87,7 @@ public class CameraScript : MonoBehaviour
                 currentCreatureIndex++;
                 currentCreatureIndex %= logic.GetCreatures().Count;
                 currentCreature = logic.GetCreatures()[currentCreatureIndex];
-                text.text = "Watching: " + currentCreature.GetComponent<CreatureScript>().GetCreatureName();
+                text.text = "Watching: " + currentCreature.GetComponent<CreatureScript>().GetCreatureName() + " " + (currentCreature.GetComponent<CreatureScript>().GetMale() ? "(Male)" : "(Female)");
             }
         }
 

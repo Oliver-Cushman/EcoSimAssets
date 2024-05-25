@@ -1,6 +1,5 @@
 using static System.Math;
 using UnityEngine;
-
 public class CreatureScript : MonoBehaviour
 {
     private bool enoughFoodConsumed;
@@ -20,7 +19,13 @@ public class CreatureScript : MonoBehaviour
     private DirectionalTendency tendency;
     private int daySpawned;
     private bool male;
+    private bool predator;
     private LogicScript logic;
+
+    public bool GetPredator()
+    {
+        return predator;
+    }
 
     public bool GetMale()
     {
@@ -51,14 +56,16 @@ public class CreatureScript : MonoBehaviour
         Ambi
     }
 
-    private readonly float CHARGE_ANGULAR_VELOCITY = 360f;
-    private readonly float SEARCH_ANGULAR_VELOCITY = 180f;
-    private readonly float POSITION_TARGET_DEADBAND = 0.5f;
+    private float BASE_SPEED = 30f;
+    private readonly float PREDATOR_BASE_SPEED = 50f;
+    private readonly float CHARGE_ANGULAR_VELOCITY = 720f;
+    private readonly float SEARCH_ANGULAR_VELOCITY = 60f;
+    private readonly float POSITION_TARGET_DEADBAND = 2f;
     private readonly float DIRECTION_CHANGE_TIME = 0.1f;
-    private readonly float BASE_SPEED = 30f;
     private readonly float TURN_PROBABILITY = 0.800f;
     private readonly float CHASE_MULTIPLIER = 1.5f;
     private readonly float PRIMARY_DIRECTION_PROBABILITY = 0.800f;
+    private readonly float SIGHT_RANGE = 500f;
     
 
     [SerializeField]
@@ -90,39 +97,34 @@ public class CreatureScript : MonoBehaviour
         if (currentTarget != null)
         {
             GoToTarget(currentTarget.transform.position);
+
+            speed = BASE_SPEED * CHASE_MULTIPLIER;
+            angularVelocity = CHARGE_ANGULAR_VELOCITY;
         }
         else
         {
+            speed = BASE_SPEED;
+            angularVelocity = SEARCH_ANGULAR_VELOCITY;
+
             RaycastHit2D hit = Physics2D.Raycast(transform.GetChild(0).gameObject.transform.position, transform.up);
+            Collider2D target = hit.collider;
             
-            if (hit.collider != null && hit.collider.gameObject.CompareTag("Food") && !enoughFoodConsumed)
+            if (ValidTarget(target) && IsFood(hit.collider.gameObject) && !enoughFoodConsumed)
             {
-                speed = BASE_SPEED * CHASE_MULTIPLIER;
-                angularVelocity = SEARCH_ANGULAR_VELOCITY;
-
                 SetTarget(hit.collider.gameObject);
-
             }
-            else if (hit.collider != null && hit.collider.gameObject.CompareTag("Creature") && ShouldBreed() && male && !hit.collider.gameObject.GetComponent<CreatureScript>().GetMale())
+            else if (ValidTarget(target) && hit.collider.gameObject.CompareTag("Creature") && ShouldBreed() && IsCompatiblePartner(hit.collider.gameObject))
             {
-                speed = BASE_SPEED * CHASE_MULTIPLIER;
-                angularVelocity = SEARCH_ANGULAR_VELOCITY;
-
                 SetTarget(hit.collider.gameObject);
                 AttractCreature(hit.collider.gameObject);
 
             }
-            else if (enoughFoodConsumed)
+            else if (enoughFoodConsumed && (!ShouldBreed() || !male))
             {
-                speed = BASE_SPEED * CHASE_MULTIPLIER;
-                angularVelocity = CHARGE_ANGULAR_VELOCITY;
-
                 SetTarget(home);
 
             } else
             {
-                speed = BASE_SPEED;
-                angularVelocity = SEARCH_ANGULAR_VELOCITY;
                 directionChangeTimer -= Time.deltaTime;
                 if (directionChangeTimer <= 0)
                 {
@@ -162,11 +164,11 @@ public class CreatureScript : MonoBehaviour
             }
         }
 
-        if (currentTarget != null && NearPose(currentTarget.transform.position))
-            currentTarget = null;
-
         if (NearPose(home.transform.position) && enoughFoodConsumed)
             sheltered = true;
+
+        if (currentTarget != null && NearPose(currentTarget.transform.position))
+            currentTarget = null;
 
         if (!sheltered)
         {
@@ -182,23 +184,40 @@ public class CreatureScript : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.gameObject.CompareTag("Food"))
+        if (IsFood(col.gameObject))
         {
-            Destroy(col.gameObject);
+            if (predator)
+            {
+                logic.KillCreature(col.gameObject);
+            } else 
+            {
+                Destroy(col.gameObject);
+            }
             currentFood++;
             if (currentFood >= foodRequired)
             {
                 enoughFoodConsumed = true;
             }
         }
-        else if (col.gameObject.CompareTag("Creature") && ShouldBreed())
+        else if (col.gameObject.CompareTag("Creature") && ShouldBreed() && IsCompatiblePartner(col.gameObject))
         {
             breeded = true;
+            
             if (!male) {
-                logic.SpawnCreature(tendency.ToString(), Random.Range(0, 2) == 0, transform.position, transform.rotation.eulerAngles.z);
+                logic.SpawnCreature(tendency.ToString(), Random.Range(0, 2) == 0, transform.position, transform.rotation.eulerAngles.z, predator);
                 Debug.Log("Fucked");
             }
         }
+    }
+
+    private bool ValidTarget(Collider2D target)
+    {
+        if (target == null)
+            return false;
+
+        Vector2 dir = (Vector2) target.gameObject.transform.position - (Vector2) transform.position;
+        
+        return dir.magnitude <= SIGHT_RANGE;
     }
 
     private void GoToTarget(Vector2 targetPos)
@@ -272,7 +291,21 @@ public class CreatureScript : MonoBehaviour
         return enoughFoodConsumed && sheltered;
     }
 
-    public void SetTraits(string tendency, int daySpawned, string name, bool male)
+    private bool IsFood(GameObject gameObject)
+    {
+        return 
+            (gameObject.CompareTag("Food") && !predator) 
+            || (gameObject.CompareTag("Creature") && !gameObject.GetComponent<CreatureScript>().GetPredator() && predator);
+    }
+
+    private bool IsCompatiblePartner(GameObject creature)
+    {
+        CreatureScript creatureLogic = creature.GetComponent<CreatureScript>();
+
+        return creatureLogic.GetMale() != male && creatureLogic.GetPredator() == predator;
+    }
+
+    public void SetTraits(string tendency, int daySpawned, string name, bool male, bool predator)
     {
         this.tendency = tendency switch
         {
@@ -284,6 +317,11 @@ public class CreatureScript : MonoBehaviour
         this.daySpawned = daySpawned;
         this.creatureName = name;
         this.male = male;
+        this.predator = predator;
+
+        if (predator) {
+            BASE_SPEED = PREDATOR_BASE_SPEED;
+        }
     }
 
     public void SetTarget(GameObject target)
