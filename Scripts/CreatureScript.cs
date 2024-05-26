@@ -119,7 +119,7 @@ public class CreatureScript : MonoBehaviour
                 AttractCreature(hit.collider.gameObject);
 
             }
-            else if (enoughFoodConsumed && (!ShouldBreed() || !male))
+            else if (enoughFoodConsumed && !ShouldBreed())
             {
                 SetTarget(home);
 

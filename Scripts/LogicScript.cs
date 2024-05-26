@@ -24,7 +24,7 @@ public class LogicScript : MonoBehaviour
     private readonly int INITIAL_FOOD = 500;
     private readonly int INCREMENT_FOOD = 300;
     private readonly int HERBIVORE_COUNT = 300;
-    private readonly int PREDATOR_COUNT = 30;
+    private readonly int PREDATOR_COUNT = 45;
     private readonly float LEFT_BOUND = -500f;
     private readonly float RIGHT_BOUND =  500f;
     private readonly float UPPER_BOUND = 500f;
