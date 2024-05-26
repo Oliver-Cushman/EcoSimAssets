@@ -57,15 +57,15 @@ public class CreatureScript : MonoBehaviour
     }
 
     private float BASE_SPEED = 30f;
-    private readonly float PREDATOR_BASE_SPEED = 50f;
+    private readonly float PREDATOR_BASE_SPEED = 35f;
     private readonly float CHARGE_ANGULAR_VELOCITY = 720f;
     private readonly float SEARCH_ANGULAR_VELOCITY = 60f;
-    private readonly float POSITION_TARGET_DEADBAND = 2f;
+    private readonly float POSITION_TARGET_DEADBAND = 0.75f;
     private readonly float DIRECTION_CHANGE_TIME = 0.1f;
     private readonly float TURN_PROBABILITY = 0.800f;
     private readonly float CHASE_MULTIPLIER = 1.5f;
     private readonly float PRIMARY_DIRECTION_PROBABILITY = 0.800f;
-    private readonly float SIGHT_RANGE = 500f;
+    private readonly float SIGHT_RANGE = 200f;
     
 
     [SerializeField]
@@ -202,7 +202,7 @@ public class CreatureScript : MonoBehaviour
         else if (col.gameObject.CompareTag("Creature") && ShouldBreed() && IsCompatiblePartner(col.gameObject))
         {
             breeded = true;
-            
+
             if (!male) {
                 logic.SpawnCreature(tendency.ToString(), Random.Range(0, 2) == 0, transform.position, transform.rotation.eulerAngles.z, predator);
                 Debug.Log("Fucked");
