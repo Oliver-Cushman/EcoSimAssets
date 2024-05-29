@@ -31,7 +31,7 @@ public class LogicScript : MonoBehaviour
     private readonly float LOWER_BOUND = -500f;
     private readonly float DAY_TIME = 30f;
     private readonly float NIGHT_TIME = 2f;
-    private readonly string[] CREATURE_NAMES = { "Oliver", "Rudy", "Frank", "Alex", "Jacob", "Tina", "Hunter", "Meza", "Travis", "Hadizah" };
+    private readonly string[] CREATURE_NAMES = { "Oliver", "Rudy", "Frank", "Alex", "Jacob", "Tina", "Hunter", "Meza", "Travis", "Hadizah", "John", "Sky", "Landyn", "Roger" };
 
     // Start is called before the first frame update
     void Start()
@@ -135,7 +135,6 @@ public class LogicScript : MonoBehaviour
 
         creatures.ForEach(ResetCreature);
 
-        Debug.Log(day);
     }
 
     private void ResetCreature(GameObject creature)
@@ -191,7 +190,6 @@ public class LogicScript : MonoBehaviour
 
     public void KillCreature(GameObject creature)
     {
-        Debug.Log("Death");
         creatures.Remove(creature);
         Destroy(creature.GetComponent<CreatureScript>().GetHome());
         Destroy(creature);
